@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skill-Bridge | Micro-Internships</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #0f0f17;
+      color: white;
+      overflow-x: hidden;
+    }
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      top: 0;
+      left: 0;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #ffc107, #212121);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero {
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin: 0;
+    }
+    .typewriter {
+      display: inline-block;
+      border-right: 3px solid #ffc107;
+      white-space: nowrap;
+      overflow: hidden;
+      animation: typing 4s steps(30, end) forwards, blink .7s infinite;
+    }
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink {
+      50% { border-color: transparent }
+    }
+    .hero p { color: white; }
+    .btn {
+      margin-top: 25px;
+      padding: 14px 32px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(to right, #ffc107, #212121);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 20px rgba(255,193,7,0.6), 0 0 40px rgba(33,33,33,0.6);
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(to right, #fff59d, #333333);
+      box-shadow: 0 0 30px rgba(255,193,7,0.9), 0 0 60px rgba(33,33,33,0.9);
+    }
+    section {
+      padding: 80px 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+    section h2 {
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 50px;
+      background: linear-gradient(90deg,#fff, #ffc107);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+      gap: 30px;
+    }
+    .card {
+      background: #1a1a25;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      transition: transform 0.4s ease, box-shadow 0.3s;
+      perspective: 1000px;
+      color: white;
+    }
+    .card:hover {
+      transform: rotateY(10deg) scale(1.05);
+      box-shadow: 0 0 25px rgba(255,193,7,0.6);
+    }
+    .contact {
+      text-align: center;
+      font-size: 1.1rem;
+      color: white;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .step {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      width: 320px;
+      transform: translateY(20px);
+    }
+    .step h2 { margin-bottom: 20px; color: white; }
+    .modal-btn {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      background: linear-gradient(to right, #ffc107, #212121);
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 0 10px rgba(255,193,7,0.5), 0 0 20px rgba(33,33,33,0.5);
+      transition: 0.3s;
+    }
+    .modal-btn:hover { 
+      background: linear-gradient(to right, #fff59d, #333333); 
+      box-shadow: 0 0 20px rgba(255,193,7,0.8), 0 0 40px rgba(33,33,33,0.8);
+    }
+    .close-btn { 
+      background: #333;
+      box-shadow: none;
+    }
+    .close-btn:hover { 
+      background: #555;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+  <header>🚀 Skill-Bridge</header>
+  <div class="hero">
+    <h1><span class="typewriter">Launch Your Career 🚀</span></h1>
+    <p style="margin-top:15px; font-size:1.3rem; color:#ccc;">
+      Real projects. Real skills. Real experience.<br>
+      Short-term internships to build your future.
+    </p>
+    <button class="btn" id="getStartedBtn">Get Started</button>
+  </div>
+  <section>
+    <h2>💡 What are Micro-Internships?</h2>
+    <div class="features">
+      <div class="card">Hands-on real projects</div>
+      <div class="card">Build industry connections</div>
+      <div class="card">Boost your portfolio</div>
+      <div class="card">Discover career paths</div>
+    </div>
+  </section>
+  <section>
+    <h2>🎯 Why Choose Us?</h2>
+    <div class="features">
+      <div class="card">Work with top companies</div>
+      <div class="card">Learn modern tools</div>
+      <div class="card">Collaborate with mentors</div>
+      <div class="card">Gain practical experience</div>
+    </div>
+  </section>
+  <section>
+    <h2>📞 Get in Touch</h2>
+    <div class="contact">Email: itsmeakhil9999@gmail.com</div>
+  </section>
+  <div class="modal" id="loginModal">
+    <div class="step" id="step1">
+      <h2>Join as</h2>
+      <button class="modal-btn" onclick="selectRole('Student')">🎓 Student</button>
+      <button class="modal-btn" onclick="selectRole('Client')">🏢 Client</button>
+      <button class="modal-btn close-btn" id="closeModal">Cancel</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 80 },
+        "size": { "value": 3 },
+        "move": { "speed": 2 },
+        "line_linked": { "enable": true, "distance": 150, "color":"#fff59d" },
+        "color": { "value": "#ffc107" }
+      }
+    });
+    const getStartedBtn = document.getElementById('getStartedBtn');
+    const loginModal = document.getElementById('loginModal');
+    const closeModal = document.getElementById('closeModal');
+    let selectedRole = "";
+    getStartedBtn.addEventListener('click', () => {
+        loginModal.style.display = 'flex';
+    });
+    closeModal.addEventListener('click', () => {
+        loginModal.style.display = 'none';
+    });
+    function selectRole(role) {
+      if (role === 'Student') {
+          window.location.href = "student_signup.html"; // student page
+      } else if (role === 'Client') {
+          window.location.href = "client_signup.html"; // client page
+      }
+    }
+    window.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+          loginModal.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
