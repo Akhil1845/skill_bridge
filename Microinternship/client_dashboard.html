@@ -47,6 +47,9 @@ form button{padding:10px;background:#FF8C00;color:white;border:none;border-radiu
 </style>
 </head>
 <body>
+
+<script src="config.js"></script> <!-- Include config.js first -->
+
 <div class="menu">
   <ul class="menu-content">
     <li><a onclick="navigate('home')"><span class="material-symbols-outlined">home</span><span>Home</span></a></li>
@@ -99,7 +102,7 @@ form button{padding:10px;background:#FF8C00;color:white;border:none;border-radiu
       <input type="number" id="internship_seats" min="1">
       <label>Whatsapp Number:</label>
       <input type="text" id="internship_whatsapp">
-      <button type="submit">Post Internship</button>
+      <button type="submit" id="internshipSubmitBtn">Post Internship</button>
     </form>
     <h3>Posted Internships</h3>
     <div id="postedInternships"></div>
@@ -157,7 +160,7 @@ function logout(){
 // --- Load Profile ---
 async function loadProfile(){
   try{
-    const res = await fetch(`http://localhost:8080/api/clients/${clientId}`);
+    const res = await fetch(`${API_BASE_URL}/api/clients/${clientId}`);
     if(!res.ok) throw new Error("Failed to load profile");
     const d = await res.json();
     document.getElementById("p_company").textContent = d.company || "";
@@ -172,6 +175,10 @@ async function loadProfile(){
 // --- Internship Form Submit ---
 document.getElementById("internshipForm").addEventListener("submit", async(e)=>{
   e.preventDefault();
+  const btn = document.getElementById("internshipSubmitBtn");
+  btn.disabled = true;
+  btn.textContent = "Posting...";
+
   const payload = {
     title: document.getElementById("internship_title").value.trim(),
     description: document.getElementById("internship_description").value.trim(),
@@ -187,7 +194,7 @@ document.getElementById("internshipForm").addEventListener("submit", async(e)=>{
   };
 
   try{
-    const res = await fetch("http://localhost:8080/api/internships",{
+    const res = await fetch(`${API_BASE_URL}/api/internships`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(payload)
@@ -197,6 +204,10 @@ document.getElementById("internshipForm").addEventListener("submit", async(e)=>{
     document.getElementById("internshipForm").reset();
     loadPostedInternships();
   }catch(e){alert(e.message);}
+  finally {
+    btn.disabled = false;
+    btn.textContent = "Post Internship";
+  }
 });
 
 // --- Load Posted Internships ---
@@ -204,7 +215,7 @@ async function loadPostedInternships(){
   const container = document.getElementById("postedInternships");
   container.innerHTML = "Loading...";
   try{
-    const res = await fetch(`http://localhost:8080/api/internships?clientId=${clientId}`);
+    const res = await fetch(`${API_BASE_URL}/api/internships?clientId=${clientId}`);
     const internships = await res.json();
     container.innerHTML="";
     if(internships.length===0){
@@ -225,16 +236,26 @@ async function loadPostedInternships(){
         End Date: ${i.endDate || 'N/A'}<br>
         Seats: ${i.seats || 'N/A'}<br>
         <button onclick="editInternship(${i.id})">Edit</button>
+        <button onclick="deleteInternship(${i.id})">Delete</button>
       `;
       container.appendChild(div);
     });
   }catch(e){container.innerHTML="<p>Error loading internships.</p>"; console.error(e);}
 }
 
-// --- Edit Internship ---
+// --- Edit & Delete Internship ---
 function editInternship(id){
   localStorage.setItem("editInternshipId", id);
   window.location.href="update_internship.html"; 
+}
+async function deleteInternship(id){
+  if(!confirm("Are you sure you want to delete this internship?")) return;
+  try{
+    const res = await fetch(`${API_BASE_URL}/api/internships/${id}`, { method:"DELETE" });
+    if(!res.ok) throw new Error("Failed to delete internship");
+    alert("Internship deleted successfully!");
+    loadPostedInternships();
+  }catch(e){alert(e.message);}
 }
 
 // --- RESULTS ---
@@ -244,11 +265,11 @@ async function loadAllResults(){
   container.innerHTML = "Loading student submissions...";
 
   try {
-    const testsRes = await fetch(`http://localhost:8080/api/tests?clientId=${clientId}`);
+    const testsRes = await fetch(`${API_BASE_URL}/api/tests?clientId=${clientId}`);
     if (!testsRes.ok) throw new Error("Failed to load tests");
     allTests = await testsRes.json();
 
-    const resRes = await fetch(`http://localhost:8080/api/results/all`);
+    const resRes = await fetch(`${API_BASE_URL}/api/results/all`);
     if (!resRes.ok) throw new Error("Failed to load results");
     const allResultsRaw = await resRes.json();
 
@@ -306,7 +327,6 @@ setInterval(() => {
     loadAllResults();
   }
 }, 15000);
-
 </script>
 </body>
 </html>

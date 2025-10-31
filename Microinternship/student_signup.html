@@ -140,8 +140,10 @@ body { display:flex; justify-content:center; align-items:center; min-height:100v
     </div>
 </div>
 
-<script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
-<script>
+<script type="module">
+import { CONFIG } from './config.js'; // your centralized config
+const BASE_URL = CONFIG.API_BASE;
+
 const container = document.querySelector('.container');
 const LoginLink = document.querySelector('.SignInLink');
 const RegisterLink = document.querySelector('.SignUpLink');
@@ -150,10 +152,10 @@ const RegisterLink = document.querySelector('.SignUpLink');
 RegisterLink.addEventListener('click', ()=> container.classList.add('active'));
 LoginLink.addEventListener('click', ()=> container.classList.remove('active'));
 
-// Toggle password visibility (fixed)
+// Toggle password visibility
 document.querySelectorAll('.toggle-password').forEach(icon => {
     icon.addEventListener('click', () => {
-        const input = icon.closest('.input-box').querySelector('input'); // correct input
+        const input = icon.closest('.input-box').querySelector('input');
         if(input.type === "password"){ 
             input.type="text"; 
             icon.classList.replace('bx-show','bx-hide'); 
@@ -170,7 +172,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
     try {
-        const response = await fetch('http://localhost:8080/api/students/login', {
+        const response = await fetch(`${BASE_URL}/students/login`, {
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ email, password })
@@ -193,7 +195,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
     const email = document.getElementById("registerEmail").value.trim();
     const password = document.getElementById("registerPassword").value.trim();
     try {
-        const response = await fetch('http://localhost:8080/api/students/register', {
+        const response = await fetch(`${BASE_URL}/students/register`, {
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ name, email, password })
@@ -209,10 +211,11 @@ document.getElementById("registerForm").addEventListener("submit", async functio
     }
 });
 
-// Social login handlers
+// Social login placeholders
 document.getElementById("googleLogin").addEventListener("click", ()=> alert("Google login not configured"));
 document.getElementById("linkedinLogin").addEventListener("click", ()=> alert("LinkedIn login not configured"));
 document.getElementById("githubLogin").addEventListener("click", ()=> alert("GitHub login not configured"));
 </script>
+<script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 </body>
 </html>

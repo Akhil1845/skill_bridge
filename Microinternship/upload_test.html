@@ -25,7 +25,7 @@ input, textarea, select { width:100%; padding:10px; border-radius:6px; border:no
 button { padding:10px 16px; border:none; border-radius:6px; background:#FF8C00; color:#fff; font-weight:600; cursor:pointer; margin-top:10px; }
 #backBtn { background:#FF8C00; margin-bottom:20px; }
 
-/* Grid for test cards - two per row */
+/* Grid for test cards */
 #testsContainer {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -44,7 +44,7 @@ button { padding:10px 16px; border:none; border-radius:6px; background:#FF8C00; 
     min-height:180px;
 }
 .test-card h2 { color:#FF8C00; margin-bottom:10px; }
-.test-card p { margin-bottom:15px; }
+.test-card p { margin-bottom:10px; }
 .test-card button { align-self:flex-start; }
 </style>
 </head>
@@ -73,11 +73,12 @@ button { padding:10px 16px; border:none; border-radius:6px; background:#FF8C00; 
 </form>
 
 <h1>Your Uploaded Tests</h1>
-<div id="testsContainer">
-  <!-- Test cards will appear here -->
-</div>
+<div id="testsContainer"></div>
 
-<script>
+<script type="module">
+import { CONFIG } from './config.js';
+
+const BASE_URL = `${CONFIG.API_BASE}/tests`;
 const clientId = localStorage.getItem("clientId");
 if(!clientId){
     alert("Please login first!");
@@ -86,7 +87,7 @@ if(!clientId){
 
 function goBack(){ window.location.href = "client_dashboard.html"; }
 
-// --- Handle test upload ---
+// Handle test upload
 document.getElementById("testForm").addEventListener("submit", async e => {
     e.preventDefault();
 
@@ -112,10 +113,10 @@ document.getElementById("testForm").addEventListener("submit", async e => {
         return;
     }
 
-    const payload = { title, description, topic, maxMarks, questions };
+    const payload = { title, description, topic, maxMarks, questions, clientId: parseInt(clientId) };
 
     try {
-        const res = await fetch(`http://localhost:8080/api/tests?clientId=${clientId}`, {
+        const res = await fetch(BASE_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -130,13 +131,13 @@ document.getElementById("testForm").addEventListener("submit", async e => {
     }
 });
 
-// --- Fetch and display uploaded tests ---
+// Fetch and display uploaded tests
 async function loadTests() {
     const container = document.getElementById("testsContainer");
     container.innerHTML = "Loading tests...";
 
     try {
-        const res = await fetch(`http://localhost:8080/api/tests/client/${clientId}`);
+        const res = await fetch(`${BASE_URL}/client/${clientId}`);
         if(!res.ok) throw new Error("Failed to load tests");
         const tests = await res.json();
 

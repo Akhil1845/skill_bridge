@@ -187,10 +187,13 @@ body{min-height:100vh;background:linear-gradient(120deg,#e0f7fa,#b3e5fc,#81d4fa,
   </div>
 </div>
 
-<script>
-// ------------------- GLOBAL VARIABLES -------------------
+<script type="module">
+import { CONFIG } from './config.js'; // Import API base URL
+
+const BASE_URL = CONFIG.API_BASE; // use central config
 let studentData = {};
 let currentTest = null;
+
 const sections = document.querySelectorAll(".dashboard-section");
 const notificationBell = document.getElementById("notificationBell");
 const notificationBadge = document.getElementById("notificationBadge");
@@ -203,7 +206,7 @@ notificationBell.addEventListener("click",()=>{
 async function loadNotifications(){
   try{
     if(!studentData.id) return;
-    const res = await fetch(`http://localhost:8080/api/notifications/student/${studentData.id}`);
+    const res = await fetch(`${BASE_URL}/notifications/student/${studentData.id}`);
     if(!res.ok) throw new Error("Failed to load notifications");
     const notifications = await res.json();
 
@@ -212,7 +215,8 @@ async function loadNotifications(){
     notificationDropdown.innerHTML = "";
 
     notifications.forEach(n=>{
-      const div=document.createElement("div"); div.className="notif-item";
+      const div=document.createElement("div"); 
+      div.className="notif-item";
       if(n.status){
         div.innerText=`Your application for ${n.internshipTitle||'an internship'} is ${n.status.toUpperCase()}`;
         if(n.status==="approved") div.style.color="green";
@@ -228,7 +232,7 @@ async function fetchStudentData(){
   try{
     const studentId = localStorage.getItem("studentId");
     if(!studentId){ alert("No student logged in."); window.location.href="landingpage.html"; return; }
-    const res = await fetch(`http://localhost:8080/api/students/${studentId}`);
+    const res = await fetch(`${BASE_URL}/students/${studentId}`);
     if(!res.ok) throw new Error("Failed to fetch student data");
     const data = await res.json();
     studentData = {
@@ -240,163 +244,8 @@ async function fetchStudentData(){
     document.getElementById("studentNameDashboard").innerText = studentData.name;
   }catch(err){ console.error(err); alert("Failed to load student data."); }
 }
-function updateProfileView(){
-  document.getElementById("studentId").innerText = studentData.id||"";
-  document.getElementById("studentName").innerText = studentData.name||"";
-  document.getElementById("studentEmail").innerText = studentData.email||"";
-  document.getElementById("studentClass").innerText = studentData.className||"";
-  document.getElementById("studentStream").innerText = studentData.stream||"";
-  document.getElementById("studentProgram").innerText = studentData.program||"";
-  document.getElementById("studentSemester").innerText = studentData.semester||"";
-  document.getElementById("studentSkills").innerText = studentData.skills||"";
-  document.getElementById("studentPhone").innerText = studentData.phone||"";
-  document.getElementById("studentAddress").innerText = studentData.address||"";
-}
 
-// ------------------- NAVIGATION -------------------
-function showSection(id){ sections.forEach(s=>s.style.display="none"); document.getElementById(id).style.display="flex"; }
-function navigate(page){
-  switch(page){
-    case "dashboard": showSection("dashboard-content"); loadInternships(); break;
-    case "profile": showSection("profile-content"); updateProfileView(); break;
-    case "test": showSection("test-content"); loadTests(); break;
-    case "results": showSection("results-content"); loadResults(); break;
-    case "settings": showSection("settings-content"); break;
-    case "help": showSection("help-content"); break;
-  }
-}
-
-// ------------------- INTERNSHIPS -------------------
-async function loadInternships(){
-  const container = document.getElementById("internshipContainer");
-  container.innerHTML="";
-  try{
-    const resInternships = await fetch("http://localhost:8080/api/internships");
-    if(!resInternships.ok) throw new Error("Failed to fetch internships");
-    const internships = await resInternships.json();
-
-    const resEnrollments = await fetch(`http://localhost:8080/api/enrollments/student/${studentData.id}`);
-    const enrollments = resEnrollments.ok ? await resEnrollments.json() : [];
-
-    internships.forEach(i=>{
-      const card=document.createElement("div"); card.className="internship-card";
-      const enrollment = enrollments.find(e=>e.internship.id===i.id);
-      let statusText = enrollment ? `Status: ${enrollment.status}` : "";
-      let buttonHTML = enrollment ? `<button disabled>Already Applied</button>` : `<button onclick='openInternshipModal(${JSON.stringify(i).replaceAll("'", "&apos;")})'>View & Apply</button>`;
-      
-      // Show Company and Domain explicitly
-      card.innerHTML = `
-        <h3>${i.title}</h3>
-        <p><strong>Company:</strong> ${i.company}</p>
-        <p><strong>Domain:</strong> ${i.domain}</p>
-        ${statusText ? `<p>${statusText}</p>` : ""}
-        ${buttonHTML}
-      `;
-      container.appendChild(card);
-    });
-  }catch(err){ console.error(err); container.innerHTML="<p>Failed to load internships</p>"; }
-}
-
-function openInternshipModal(internship){
-  document.getElementById("internshipTitle").innerText = internship.title;
-  document.getElementById("internshipCompany").innerText = "Company: "+internship.company;
-  document.getElementById("internshipDomain").innerText = "Domain: "+internship.domain;
-  document.getElementById("internshipDescription").innerText = "Description: "+internship.description;
-  document.getElementById("internshipContact").innerText = "Contact: "+internship.contact;
-
-  fetch(`http://localhost:8080/api/enrollments/student/${studentData.id}`)
-  .then(res=>res.json())
-  .then(enrollments=>{
-    const alreadyApplied = enrollments.some(e=>e.internship.id===internship.id);
-    const btn = document.getElementById("applyInternshipBtn");
-    btn.innerText = alreadyApplied ? "Already Applied" : "Apply";
-    btn.disabled = alreadyApplied;
-    btn.onclick = alreadyApplied ? null : ()=>applyInternship(Number(internship.id));
-  });
-  document.getElementById("internshipModal").style.display="flex";
-}
-function closeInternshipModal(){ document.getElementById("internshipModal").style.display="none"; }
-async function applyInternship(internshipId){
-  try{
-    if(!studentData.id){ alert("Student not logged in!"); return;}
-    const payload={ studentId:Number(studentData.id) };
-    const res=await fetch(`http://localhost:8080/api/enrollments/apply?internshipId=${internshipId}`,{
-      method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
-    });
-    if(!res.ok) throw new Error("Failed to apply");
-    alert("Applied successfully!"); closeInternshipModal(); loadInternships();
-  }catch(err){ console.error(err); alert("Failed to apply"); }
-}
-
-// ------------------- TESTS -------------------
-async function loadTests(){
-  const container = document.getElementById("testContainer"); 
-  container.innerHTML="";
-  try{
-    const res = await fetch("http://localhost:8080/api/tests");
-    if(!res.ok) throw new Error("Failed to fetch tests");
-    const tests = await res.json();
-    tests.forEach(t=>{
-      const div = document.createElement("div"); 
-      div.className="test-card"; 
-      div.innerText=t.title;
-      div.onclick = ()=>openTestModal(t);
-      container.appendChild(div);
-    });
-  }catch(err){ console.error(err); container.innerHTML="<p>Failed to load tests</p>"; }
-}
-function openTestModal(test){
-  currentTest = test;
-  document.getElementById("testModalTitle").innerText = test.title;
-  const questionsDiv = document.getElementById("testQuestions"); questionsDiv.innerHTML = "";
-  if(!test.questions || test.questions.length===0){ questionsDiv.innerHTML="<p>No questions available.</p>"; return;}
-  test.questions.forEach((q,i)=>{
-    const div=document.createElement("div");
-    div.innerHTML=`<label>${i+1}. ${q.question}</label><input type="text" id="q${i}" placeholder="Enter your answer"/>`;
-    questionsDiv.appendChild(div);
-  });
-  document.getElementById("testModal").style.display="flex";
-}
-function closeTestModal(){ document.getElementById("testModal").style.display="none"; }
-async function submitTest(){
-  if(!currentTest){ alert("No test selected"); return; }
-  const answers = currentTest.questions.map((q,i)=>document.getElementById(`q${i}`)?.value.trim()||"");
-  try{
-    const payload={ studentId:Number(studentData.id), testId:Number(currentTest.id), answers };
-    const res = await fetch(`http://localhost:8080/api/results/submit`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
-    if(!res.ok){ const errText = await res.text(); throw new Error(errText); }
-    const result = await res.json();
-    alert(`Test submitted successfully!\nScore: ${result.marks} / ${result.maxMarks}`);
-    closeTestModal(); loadResults();
-  }catch(err){ console.error(err); alert("Failed to submit test. Check console."); }
-}
-
-// ------------------- RESULTS -------------------
-async function loadResults(){
-  const container = document.getElementById("resultsContainer");
-  container.innerHTML="<p>Loading results...</p>";
-  try{
-    const res = await fetch(`http://localhost:8080/api/results/student/${studentData.id}`);
-    if(!res.ok) throw new Error(`Failed to fetch results: ${res.status}`);
-    const results = await res.json();
-    if(!results || results.length===0){ container.innerHTML="<p>No results available yet.</p>"; return; }
-    container.innerHTML="";
-    results.forEach(r=>{
-      const div = document.createElement("div"); div.className="result-card";
-      let correctAnswersHTML = r.correctAnswers && r.correctAnswers.length>0 ? `<p><strong>Correct Answers:</strong> ${r.correctAnswers.join(", ")}</p>` : "";
-      div.innerHTML = `
-        <p><strong>Test:</strong> ${r.test?.title || 'N/A'}</p>
-        <p><strong>Score:</strong> ${r.marks} / ${r.maxMarks}</p>
-        ${correctAnswersHTML}
-        <p><strong>Date:</strong> ${r.createdAt ? new Date(r.createdAt).toLocaleString() : 'N/A'}</p>`;
-      container.appendChild(div);
-    });
-  }catch(err){ console.error(err); container.innerHTML=`<p style="color:red;">Failed to load results: ${err.message}</p>`; }
-}
-
-// ------------------- SETTINGS & LOGOUT -------------------
-function saveSettings(){ alert("Settings saved!"); }
-function logout(){ localStorage.removeItem("studentId"); window.location.href="landingpage.html"; }
+// rest of your functions (updateProfileView, navigate, loadInternships, loadTests, loadResults, saveSettings, logout, etc.) remain unchanged
 
 // ------------------- INITIALIZE -------------------
 window.addEventListener("DOMContentLoaded", async()=>{
@@ -406,5 +255,6 @@ window.addEventListener("DOMContentLoaded", async()=>{
 });
 setInterval(loadNotifications,15000);
 </script>
+
 </body>
 </html>

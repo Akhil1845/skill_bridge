@@ -14,30 +14,16 @@ label{display:block;margin:8px 0 4px;}
 input, textarea{width:100%;padding:10px;border-radius:6px;border:none;margin-bottom:10px;}
 button{padding:10px 16px;border:none;border-radius:6px;background:#FF8C00;color:#fff;font-weight:600;cursor:pointer;margin-top:10px;}
 #backBtn{background:#FF8C00;margin-bottom:20px;}
-
-/* Cards Container */
-#testsContainer{
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap:20px;
-}
-
-/* Individual Card */
-.test-card{
-    background:#ffffff10;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 0 10px rgba(0,0,0,.3);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-}
+#testsContainer{display:grid;grid-template-columns: repeat(2, 1fr);gap:20px;}
+.test-card{background:#ffffff10;padding:20px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,.3);display:flex;flex-direction:column;justify-content:space-between;}
 .test-card h2{color:#FF8C00;margin-bottom:10px;}
 .test-card p{margin-bottom:15px;}
 .test-card button{align-self:flex-start;}
 </style>
 </head>
 <body>
+
+<script src="config.js"></script> <!-- Include config.js for API_BASE_URL -->
 
 <h1>Upload New Test</h1>
 <button id="backBtn" onclick="goBack()">← Back to Dashboard</button>
@@ -68,6 +54,7 @@ button{padding:10px 16px;border:none;border-radius:6px;background:#FF8C00;color:
 
 <script>
 const clientId = localStorage.getItem("clientId");
+
 if(!clientId){
     alert("Please login first!");
     window.location.href="client_signup.html";
@@ -109,11 +96,11 @@ document.getElementById("testForm").addEventListener("submit", async e=>{
         topic, 
         max_marks: maxMarks, 
         questions, 
-        client_id: parseInt(clientId)  // <-- Ensure client_id is included
+        client_id: parseInt(clientId)
     };
 
     try{
-        const res = await fetch("http://localhost:8080/api/tests", {
+        const res = await fetch(`${API_BASE_URL}/tests`, {
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(payload)
@@ -135,7 +122,7 @@ async function loadTests(){
     container.innerHTML = "Loading tests...";
 
     try{
-        const res = await fetch(`http://localhost:8080/api/tests/client/${clientId}`);
+        const res = await fetch(`${API_BASE_URL}/tests/client/${clientId}`);
         if(!res.ok) throw new Error("Failed to load tests");
         const tests = await res.json();
 

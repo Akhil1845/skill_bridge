@@ -22,13 +22,14 @@ h1{font-size:2rem;font-weight:700;margin-bottom:20px;color:#253858;}
 
 .test-container{display:flex;flex-direction:column;gap:20px;}
 .test-card{
-  background:#ccc;padding:15px;border-radius:10px;
+  background:#fff;padding:15px;border-radius:10px;
   box-shadow:0 5px 10px rgba(0,0,0,0.2);
   color:#253858;
   display:flex;justify-content:space-between;align-items:center;
   transition:0.3s;
 }
 .test-card:hover{background:#1e90ff;color:#fff;}
+.test-card:hover .test-info span{color:#fff;}
 .test-info{display:flex;flex-direction:column;}
 .test-info span{font-size:0.9rem;color:#333;}
 button.attempt-btn{padding:8px 12px;border:none;border-radius:6px;background:#1e90ff;color:white;cursor:pointer;font-weight:600;}
@@ -69,8 +70,8 @@ button.attempt-btn{padding:8px 12px;border:none;border-radius:6px;background:#1e
 </div>
 
 <script>
-const API_BASE = "http://localhost:8080/api/tests";
-const RESULTS_API = "http://localhost:8080/api/results/submit";
+const API_BASE = "https://skill-bridge-mzcv.onrender.com/api/tests";
+const RESULTS_API = "https://skill-bridge-mzcv.onrender.com/api/results/submit";
 
 const studentId = localStorage.getItem("studentId");
 const studentName = localStorage.getItem("studentName") || "Student";
@@ -84,18 +85,16 @@ if(!studentId){
 
 let currentTest = null;
 
-// Go back to dashboard
 function goBack(){
     window.location.href = "student_dashboard.html";
 }
 
-// Load all tests
 async function loadTests(){
     const container = document.getElementById("testsContainer");
     container.innerHTML = "Loading tests...";
 
     try {
-        const res = await fetch(`${API_BASE}`);
+        const res = await fetch(API_BASE);
         if(!res.ok) throw new Error(`Server responded ${res.status}`);
         const tests = await res.json();
 
@@ -134,7 +133,6 @@ async function loadTests(){
     }
 }
 
-// Open modal to attempt a test
 function openModal(test){
     currentTest = test;
     document.getElementById("modalTitle").innerText = test.title;
@@ -163,13 +161,11 @@ function openModal(test){
     document.getElementById("testModal").style.display = "flex";
 }
 
-// Close modal
 function closeModal(){
     document.getElementById("testModal").style.display = "none";
     document.getElementById("message").innerText = "";
 }
 
-// Submit test answers
 async function submitTest(){
     if(!currentTest) return;
 
@@ -190,7 +186,7 @@ async function submitTest(){
     document.getElementById("message").innerText = `You scored ${score} / ${maxMarks}`;
 
     try {
-        const res = await fetch(`${RESULTS_API}`, {
+        const res = await fetch(RESULTS_API, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -202,10 +198,10 @@ async function submitTest(){
 
         if(!res.ok) throw new Error(`Server responded with ${res.status}`);
         closeModal();
-        alert("Your result has been saved successfully!");
+        alert("✅ Your result has been saved successfully!");
     } catch(err){
         console.error("Failed to save result:", err);
-        document.getElementById("message").innerText = "Failed to save result. Try again!";
+        document.getElementById("message").innerText = "❌ Failed to save result. Try again!";
     }
 }
 
